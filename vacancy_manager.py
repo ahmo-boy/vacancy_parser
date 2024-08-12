@@ -44,3 +44,4 @@ class JSONVacancyManager(VacancyManager):
         vacancies = [vac for vac in vacancies if vac.get('id') != vacancy_id]
         with open(self.file_name, 'w', encoding='utf-8') as file:
             json.dump(vacancies, file, ensure_ascii=False, indent=4)
+

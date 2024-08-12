@@ -2,6 +2,9 @@ from parser import HH
 from vacancy_manager import JSONVacancyManager
 
 def user_interaction():
+    '''
+    Функция - позволящая взаимодействовать с
+    '''
     json_manager = JSONVacancyManager('vacancies.json')
     hh = HH(json_manager)
 
