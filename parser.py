@@ -1,11 +1,15 @@
 from abc import ABC, abstractmethod
 import requests
 
+
 class Parser(ABC):
+    """
+    Класс Parser - загужает, перибирает вакансии. А также сохраняет и выводит из файла
+    """
     def __init__(self, file_worker):
-        '''
+        """
         Метод - инициатор
-        '''
+        """
         self.file_worker = file_worker
         self.vacancies = []
 
@@ -40,6 +44,9 @@ class Parser(ABC):
 
 
 class HH(Parser):
+    """
+    Этот класс дочерний от класса Parser, он переопределяет родительские методы, позволяя загрузить
+    """
     def __init__(self, file_worker):
         super().__init__(file_worker)
         self.url = 'https://api.hh.ru/vacancies'
@@ -51,10 +58,10 @@ class HH(Parser):
         while self.params['page'] < 20:
             response = requests.get(self.url, headers=self.headers, params=self.params)
             if response.status_code == 200:
-                vacancies = response.json()['items', []]
+                vacancies = response.json()['items']
                 if not vacancies:
                     break
-                self.vacancies.extend(vacancies)
+                self.vacancies.extend([Vacancy(vac) for vac in vacancies])
                 self.params['page'] += 1
             else:
                 print(f'Failed to get data: {response.status_code}')
@@ -72,8 +79,12 @@ class HH(Parser):
 
 class Vacancy:
     def __init__(self, vacancy):
-        parser = HH() # создаем экземпляр класса, чтобы иметь доступ к его атрибутам
-        self.vacancy_info = parser.parse_vacancy(vacancy) # используем метод parse_vacancy
+        # Используем метод parse_vacancy для извлечения информации о вакансии
+        self.id = vacancy['id']
+        self.name = vacancy['name']
+        self.employer = vacancy['employer']['name']
+        self.salary = self.validate_salary(vacancy['salary'])
+        self.area = vacancy['area']['name']
 
     def validate_salary(self, salary): # проверяет значение зарплаты, так мы не получим ошибку если зарплата не указана
         if salary is None:
@@ -84,7 +95,7 @@ class Vacancy:
         else:
             raise ValueError("Invalid salary value")
 
-    def __It__(self, other):
+    def __lt__(self, other):
         return self.salary < other.salary
 
     def __eq__(self, other):
